@@ -1,16 +1,57 @@
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button } from 'react-native';
+import { Auth, Amplify } from 'aws-amplify';
+import config from './src/aws-exports';
+import { Authenticator, withAuthenticator } from 'aws-amplify-react-native';
+import { AmplifyTheme } from './components/AmplifyTheme'
 
-export default function App() {
+Amplify.configure({
+  ...config,
+  Analytics: {
+    disabled: true,
+  },
+});
+
+async function signOut() {
+  try {
+    await Auth.signOut();
+  } catch (error) {
+    console.log('Error signing out: ', error);
+  }
+}
+
+
+const signUpConfig = {
+  hideAllDefaults: true,
+  signUpFields: [
+    {
+      label: 'Email',
+      key: 'email',
+      required: true,
+      displayOrder: 1,
+      type: 'string',
+    },
+    {
+      label: 'Password',
+      key: 'password',
+      required: true,
+      displayOrder: 2,
+      type: 'password',
+    },
+  ],
+}
+
+const App = () => {
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <Text> React Native + Amplify </Text>
+      <Button title="Sign Out" color="tomato" onPress={signOut} />
       <StatusBar style="auto" />
     </View>
   );
-}
 
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -18,4 +59,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+});
+
+export default withAuthenticator(App, {
+  signUpConfig: signUpConfig,
+  usernameAttributes: "email",
+  theme: AmplifyTheme
 });
